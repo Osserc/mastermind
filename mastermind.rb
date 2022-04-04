@@ -43,14 +43,24 @@ class Game
 
     def play_game
         rounds = 0
+        correct_guesses = 0
+        partial_guesses = 0
+        guess_range = Array.new
+        start_guesses = 0
+        right_guesses = 0
         player_one = make_player_one()
         player_two = make_player_two(player_one)
         code_to_break = input_and_check_code_maker(player_one, player_two)
         while rounds < 12 do
-            code_breaker = input_and_check_code_breaker(player_one, player_two)
+            if check_human_breaker(player_one, player_two) == true
+                code_breaker = input_and_check_code_breaker(player_one)
+            else
+                code_breaker, start_guesses = player_two.guess_code_computer(guess_range, start_guesses, right_guesses, rounds, code_to_break)
+            end
             correct_guesses, code_to_break_modified, code_breaker_modified = confront_codes_correct(code_to_break, code_breaker)
             partial_guesses = confront_codes_partial(code_to_break_modified, code_breaker_modified)
             read_results(correct_guesses, partial_guesses, code_breaker, rounds)
+            guess_range, right_guesses = player_two.update_algorithm(correct_guesses, partial_guesses, guess_range, right_guesses, code_breaker)
             rounds += 1
             if check_winner(correct_guesses, rounds, player_one, player_two) == true
                 break
@@ -59,6 +69,7 @@ class Game
         more_rounds?()
     end
 
+    private
     def input_and_check_code_maker(player_one, player_two)
         if player_one.breaker == "no"
             puts "Please enter the code you wish your opponent to break"
@@ -73,25 +84,13 @@ class Game
         code_to_break
     end
 
-    def input_and_check_code_breaker(player_one, player_two)
-        if player_one.breaker == "yes"
+    def input_and_check_code_breaker(player_one)
             puts "Please enter the code you think the opponent selected"
             code_breaker = player_one.make_code
             until check_code_range(code_breaker) == true && check_code_length(code_breaker) == true do
                 input_warning
                 code_breaker = player_one.make_code
             end
-        else
-            # temporarily commandering the code breaker to test
-            puts "Please enter the code you think the opponent selected"
-            code_breaker = player_one.make_code
-            until check_code_range(code_breaker) == true && check_code_length(code_breaker) == true do
-                input_warning
-                code_breaker = player_one.make_code
-            end
-            # code_breaker = player_two.make_code
-            # puts code_breaker.join
-        end
         code_breaker
     end
 
@@ -113,8 +112,16 @@ class Game
        end
     end
 
+    def check_human_breaker(player_one, player_two)
+        if player_one.human.even? == true && player_one.breaker == "yes"
+            return true
+        elsif player_two.human.even? == false && player_two.breaker == "yes"
+            return false
+        end
+    end
+
     def read_results(correct_guesses, partial_guesses, code_breaker, rounds)
-        puts "Results for round #{rounds + 1}\nCode #{code_breaker}: " + ("[x]" * correct_guesses) + " || " + ("[o]" * partial_guesses)
+        puts "Results for round #{rounds + 1}\nCode #{code_breaker.join}: " + ("[x]" * correct_guesses) + " || " + ("[o]" * partial_guesses)
     end
 
     def check_winner(correct_guesses, rounds, player_one, player_two)
@@ -170,23 +177,37 @@ class Player
 
     def make_code()
         if self.human.even? == true
-            puts "Insert your 4-numbered code."
-            code = gets.chomp.split('').map { | character | character.to_i}
+            make_code_human()
         else
             code = RANGE.sample(4)
         end
     end
 
-    def guess_code(player)
-
+    def make_code_human()
+        puts "Insert a 4-numbered code within range."
+        code = gets.chomp.split('').map { | character | character.to_i}
     end
-end
 
-class Code
-    # attr_reader :
+    def guess_code_computer(guess_range, start_guesses, right_guesses, rounds, code_to_break)
+        if right_guesses < 4
+            code_breaker = [start_guesses + 1] * 4
+            start_guesses += 1
+            return code_breaker, start_guesses
+        else
+            code_breaker = Array.new.push(code_to_break[0])
+            guess_range -= code_breaker
+            code_breaker.push(guess_range.shuffle)
+            return code_breaker, start_guesses
+        end
+    end
 
-    def initialize(code)
-
+    def update_algorithm(correct_guesses, partial_guesses, guess_range, right_guesses, code_breaker)
+        if (correct_guesses > 0 || partial_guesses > 0) && (right_guesses < 4)
+            total = correct_guesses + partial_guesses
+            right_guesses += total
+            guess_range.push(code_breaker[0] * total)
+        end
+        return guess_range, right_guesses
     end
 
 end
