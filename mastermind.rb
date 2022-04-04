@@ -42,8 +42,6 @@ class Game
     include Validation
 
     def play_game
-        puts "Welcome, this is Mastermind, a game where you will prove your smarts against the computer!\nYou will either try to guess a 4-number code made by your opponent, or come up with one yourself and see whether the computer is able to guess it, depending on the role you wish to play.\nThe code-maker selects a code and the code-breaker tries to break it.\nYou will have 6 numbers at your disposal, ranging from 1 to 6, which you can arrange however you see fit. You can even choose the same digit 4 times!\nAfter every round, the code-breaker receives hints based on his performance: a [x] for each correct digit in the correct position, and a [o] for each right digit but in the wrong position.\nThe game lasts for a maximum of 12 rounds.\nAre you ready to challenge the machine overlord?\n
-        P.S.: he cheats. Don\'t trust him.\n\n"
         rounds = 0
         correct_guesses = 0
         partial_guesses = 0
@@ -214,4 +212,6 @@ class Player
 
 end
 
+puts "Welcome, this is Mastermind, a game where you will prove your smarts against the computer!\nYou will either try to guess a 4-number code made by your opponent, or come up with one yourself and see whether the computer is able to guess it, depending on the role you wish to play.\nThe code-maker selects a code and the code-breaker tries to break it.\nYou will have 6 numbers at your disposal, ranging from 1 to 6, which you can arrange however you see fit. You can even choose the same digit 4 times!\nAfter every round, the code-breaker receives hints based on his performance: a [x] for each correct digit in the correct position, and a [o] for each right digit but in the wrong position.\nThe game lasts for a maximum of 12 rounds.\nAre you ready to challenge the machine overlord?\n
+        P.S.: he cheats. Don\'t trust him.\n\n"
 Game.new.play_game
